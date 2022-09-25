@@ -1,0 +1,25 @@
+<config>
+    <input>
+        <jar in="../target/sigar.jar" out="../target/sigar.jar"/>
+    </input>
+
+    <keep-names>
+        <class access="protected+">
+            <field access="protected+"/>
+            <method access="protected+"/>
+        </class>
+<!--        <method template="*(**)" parameters="keep"/>-->
+    </keep-names>
+
+    <property name="log-file" value="log.xml"/>
+    <ignore-classes>
+        <!-- 不要混淆第三方的代码，否则会运行jar包会报错java.lang.NoClassDefFoundError -->
+        <class template="class org.dom4j.*" />
+        <class template="class akka.actor.*" />
+        <class template="class *alibaba*" />
+<!--        <class template="class *org*" />-->
+        <class template="class *rabbitmq*" />
+        <class template="class *springframework*" />
+        <class template="class *lombok*" />
+    </ignore-classes>
+</config>
