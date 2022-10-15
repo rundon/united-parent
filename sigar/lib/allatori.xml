@@ -11,7 +11,7 @@
 <!--        <method template="*(**)" parameters="keep"/>-->
     </keep-names>
 
-    <property name="log-file" value="log.xml"/>
+    <property name="log-file" value="D:/var/log.xml"/>
     <ignore-classes>
         <!-- 不要混淆第三方的代码，否则会运行jar包会报错java.lang.NoClassDefFoundError -->
         <class template="class org.dom4j.*" />
