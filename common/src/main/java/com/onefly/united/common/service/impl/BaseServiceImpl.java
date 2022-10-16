@@ -15,6 +15,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.metadata.OrderItem;
 import com.baomidou.mybatisplus.core.toolkit.*;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.baomidou.mybatisplus.extension.toolkit.SqlHelper;
 import com.onefly.united.common.constant.Constant;
 import com.onefly.united.common.page.PageData;
@@ -130,7 +131,7 @@ public abstract class BaseServiceImpl<M extends BaseMapper<T>, T>  implements Ba
     }
 
     protected Class<T> currentModelClass() {
-        return (Class<T>)ReflectionKit.getSuperClassGenericType(getClass(), 1);
+        return (Class<T>)ReflectionKit.getSuperClassGenericType(this.getClass(), BaseServiceImpl.class, 1);
     }
 
     /**
@@ -161,6 +162,7 @@ public abstract class BaseServiceImpl<M extends BaseMapper<T>, T>  implements Ba
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public boolean insert(T entity) {
         return BaseServiceImpl.retBool(baseDao.insert(entity));
     }
@@ -200,11 +202,13 @@ public abstract class BaseServiceImpl<M extends BaseMapper<T>, T>  implements Ba
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public boolean updateById(T entity) {
         return BaseServiceImpl.retBool(baseDao.updateById(entity));
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public boolean update(T entity, Wrapper<T> updateWrapper) {
         return BaseServiceImpl.retBool(baseDao.update(entity, updateWrapper));
     }
@@ -247,11 +251,13 @@ public abstract class BaseServiceImpl<M extends BaseMapper<T>, T>  implements Ba
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public boolean deleteById(Serializable id) {
         return SqlHelper.retBool(baseDao.deleteById(id));
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public boolean deleteBatchIds(Collection<? extends Serializable> idList) {
         return SqlHelper.retBool(baseDao.deleteBatchIds(idList));
     }

@@ -1,33 +1,31 @@
 /**
  * Copyright (c) 2018 人人开源 All rights reserved.
- *
+ * <p>
  * https://www.renren.io
- *
+ * <p>
  * 版权所有，侵权必究！
  */
 
 package com.onefly.united.common.interceptor;
 
+import com.baomidou.mybatisplus.core.plugins.InterceptorIgnoreHelper;
 import com.baomidou.mybatisplus.core.toolkit.PluginUtils;
-import com.baomidou.mybatisplus.extension.handlers.AbstractSqlParserHandler;
-import net.sf.jsqlparser.JSQLParserException;
-import net.sf.jsqlparser.expression.Expression;
-import net.sf.jsqlparser.expression.StringValue;
-import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
-import net.sf.jsqlparser.parser.CCJSqlParserUtil;
+import com.baomidou.mybatisplus.extension.plugins.inner.DataPermissionInterceptor;
+import com.onefly.united.common.handler.DataFilterPermissionHandler;
+import lombok.*;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
-import org.apache.ibatis.executor.statement.StatementHandler;
+import net.sf.jsqlparser.statement.select.SelectBody;
+import net.sf.jsqlparser.statement.select.SetOperationList;
+import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
-import org.apache.ibatis.mapping.SqlCommandType;
-import org.apache.ibatis.plugin.*;
-import org.apache.ibatis.reflection.MetaObject;
-import org.apache.ibatis.reflection.SystemMetaObject;
+import org.apache.ibatis.session.ResultHandler;
+import org.apache.ibatis.session.RowBounds;
 
-import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 /**
  * 数据过滤
@@ -35,28 +33,40 @@ import java.util.Properties;
  * @author Mark sunlightcs@gmail.com
  * @since 1.0.0
  */
-@Intercepts({@Signature(type = StatementHandler.class, method = "prepare", args = {Connection.class, Integer.class})})
-public class DataFilterInterceptor extends AbstractSqlParserHandler implements Interceptor {
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString(callSuper = true)
+@EqualsAndHashCode(callSuper = true)
+public class DataFilterInterceptor extends DataPermissionInterceptor {
+
+    private DataFilterPermissionHandler dataPermissionHandler;
 
     @Override
-    public Object intercept(Invocation invocation) throws Throwable {
-        StatementHandler statementHandler = (StatementHandler) PluginUtils.realTarget(invocation.getTarget());
-        MetaObject metaObject = SystemMetaObject.forObject(statementHandler);
-
-        // SQL解析
-        this.sqlParser(metaObject);
-
-        // 先判断是不是SELECT操作
-        MappedStatement mappedStatement = (MappedStatement) metaObject.getValue("delegate.mappedStatement");
-        if (!SqlCommandType.SELECT.equals(mappedStatement.getSqlCommandType())) {
-            return invocation.proceed();
+    public void beforeQuery(Executor executor, MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql) throws SQLException {
+        if (!InterceptorIgnoreHelper.willIgnoreDataPermission(ms.getId())) {
+            PluginUtils.MPBoundSql mpBs = PluginUtils.mpBoundSql(boundSql);
+            mpBs.sql(this.parserSingle(mpBs.sql(), boundSql.getParameterObject()));
         }
+    }
 
-        // 针对定义了rowBounds，做为mapper接口方法的参数
-        BoundSql boundSql = (BoundSql) metaObject.getValue("delegate.boundSql");
-        String originalSql = boundSql.getSql();
-        Object paramObj = boundSql.getParameterObject();
+    @Override
+    protected void processSelect(Select select, int index, String sql, Object obj) {
+        SelectBody selectBody = select.getSelectBody();
+        if (selectBody instanceof PlainSelect) {
+            PlainSelect plainSelect = (PlainSelect) selectBody;
+            this.processDataPermission(plainSelect, obj);
+        } else if (selectBody instanceof SetOperationList) {
+            SetOperationList setOperationList = (SetOperationList) selectBody;
+            List<SelectBody> selectBodyList = setOperationList.getSelects();
+            selectBodyList.forEach((s) -> {
+                PlainSelect plainSelect = (PlainSelect) s;
+                this.processDataPermission(plainSelect, obj);
+            });
+        }
+    }
 
+    protected void processDataPermission(PlainSelect plainSelect, Object paramObj) {
         // 判断参数里是否有DataScope对象
         DataScope scope = null;
         if (paramObj instanceof DataScope) {
@@ -69,49 +79,8 @@ public class DataFilterInterceptor extends AbstractSqlParserHandler implements I
                 }
             }
         }
-
-        // 不用数据过滤
-        if(scope == null){
-            return invocation.proceed();
+        if (scope != null) {
+            this.dataPermissionHandler.processDataPermission(plainSelect, scope);
         }
-
-        // 拼接新SQL
-        originalSql = getSelect(originalSql, scope);
-
-        // 重写SQL
-        metaObject.setValue("delegate.boundSql.sql", originalSql);
-        return invocation.proceed();
-    }
-
-    private String getSelect(String originalSql, DataScope scope){
-        try {
-            Select select = (Select) CCJSqlParserUtil.parse(originalSql);
-            PlainSelect plainSelect = (PlainSelect) select.getSelectBody();
-
-            Expression expression = plainSelect.getWhere();
-            if(expression == null){
-                plainSelect.setWhere(new StringValue(scope.getSqlFilter()));
-            }else{
-                AndExpression andExpression =  new AndExpression(expression, new StringValue(scope.getSqlFilter()));
-                plainSelect.setWhere(andExpression);
-            }
-
-            return select.toString().replaceAll("'", "");
-        }catch (JSQLParserException e){
-            return originalSql;
-        }
-    }
-
-    @Override
-    public Object plugin(Object target) {
-        if (target instanceof StatementHandler) {
-            return Plugin.wrap(target, this);
-        }
-        return target;
-    }
-
-    @Override
-    public void setProperties(Properties properties) {
-
     }
 }

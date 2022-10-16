@@ -1,18 +1,25 @@
 /**
  * Copyright (c) 2018 人人开源 All rights reserved.
- *
+ * <p>
  * https://www.renren.io
- *
+ * <p>
  * 版权所有，侵权必究！
  */
 
 package com.onefly.united.common.config;
 
-import com.baomidou.mybatisplus.extension.plugins.PaginationInterceptor;
+import com.baomidou.mybatisplus.annotation.DbType;
+import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
+import com.baomidou.mybatisplus.extension.plugins.inner.BlockAttackInnerInterceptor;
+import com.baomidou.mybatisplus.extension.plugins.inner.OptimisticLockerInnerInterceptor;
+import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
+import com.baomidou.mybatisplus.extension.plugins.inner.TenantLineInnerInterceptor;
+import com.onefly.united.common.handler.DataFilterPermissionHandler;
 import com.onefly.united.common.interceptor.DataFilterInterceptor;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.annotation.Order;
 
 /**
  * mybatis-plus配置
@@ -21,24 +28,37 @@ import org.springframework.core.annotation.Order;
  * @since 1.0.0
  */
 @Configuration
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class MybatisPlusConfig {
 
-    /**
-     * 配置数据权限
-     */
-    @Bean
-    @Order(1)
-    public DataFilterInterceptor dataFilterInterceptor() {
-        return new DataFilterInterceptor();
-    }
+    private final DataFilterPermissionHandler dataPermissionHandler;
 
     /**
      * 配置分页
      */
     @Bean
-    @Order(0)
-    public PaginationInterceptor paginationInterceptor() {
-        return new PaginationInterceptor();
+    public MybatisPlusInterceptor mybatisPlusInterceptor() {
+        MybatisPlusInterceptor interceptor = new MybatisPlusInterceptor();
+        //数据权限插件
+        interceptor.addInnerInterceptor(new DataFilterInterceptor(dataPermissionHandler));
+
+        //分页插件
+        interceptor.addInnerInterceptor(new PaginationInnerInterceptor(DbType.MYSQL));
+
+        // 乐观锁
+        interceptor.addInnerInterceptor(new OptimisticLockerInnerInterceptor());
+        // 防止全表更新与删除
+        interceptor.addInnerInterceptor(new BlockAttackInnerInterceptor());
+
+        return interceptor;
     }
 
+    /**
+     * 乐观锁插件 当要更新一条记录的时候，希望这条记录没有被别人更新
+     * https://mybatis.plus/guide/interceptor-optimistic-locker.html#optimisticlockerinnerinterceptor
+     */
+    @Bean
+    public OptimisticLockerInnerInterceptor optimisticLockerInterceptor() {
+        return new OptimisticLockerInnerInterceptor();
+    }
 }

@@ -1,12 +1,16 @@
 /**
  * Copyright (c) 2018 人人开源 All rights reserved.
- *
+ * <p>
  * https://www.renren.io
- *
+ * <p>
  * 版权所有，侵权必究！
  */
 
 package com.onefly.united.common.interceptor;
+
+import com.onefly.united.common.annotation.DataFilter;
+import com.onefly.united.common.user.UserDetail;
+import lombok.Data;
 
 /**
  * 数据范围
@@ -14,23 +18,20 @@ package com.onefly.united.common.interceptor;
  * @author Mark sunlightcs@gmail.com
  * @since 1.0.0
  */
+@Data
 public class DataScope {
-    private String sqlFilter;
 
-    public DataScope(String sqlFilter) {
-        this.sqlFilter = sqlFilter;
-    }
+    private DataFilter dataFilter;
 
-    public String getSqlFilter() {
-        return sqlFilter;
-    }
+    private UserDetail user;
 
-    public void setSqlFilter(String sqlFilter) {
-        this.sqlFilter = sqlFilter;
+    public DataScope(UserDetail user, DataFilter dataFilter) {
+        this.user = user;
+        this.dataFilter = dataFilter;
     }
 
     @Override
     public String toString() {
-        return this.sqlFilter;
+        return "[table=" + this.dataFilter.tableAlias() + ",userId=" + this.dataFilter.userId() + ",dept_id=" + this.dataFilter.deptId() + "]";
     }
 }

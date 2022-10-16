@@ -16,6 +16,7 @@ import com.onefly.united.common.page.PageData;
 import com.onefly.united.common.service.CrudService;
 import com.onefly.united.common.utils.ConvertUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.List;
@@ -29,7 +30,7 @@ import java.util.Map;
 public abstract class CrudServiceImpl<M extends BaseMapper<T>, T, D> extends BaseServiceImpl<M, T> implements CrudService<T, D> {
 
     protected Class<D> currentDtoClass() {
-        return (Class<D>)ReflectionKit.getSuperClassGenericType(getClass(), 2);
+        return (Class<D>)ReflectionKit.getSuperClassGenericType(getClass(),CrudServiceImpl.class, 2);
     }
 
     @Override
@@ -59,6 +60,7 @@ public abstract class CrudServiceImpl<M extends BaseMapper<T>, T, D> extends Bas
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void save(D dto) {
         T entity = ConvertUtils.sourceToTarget(dto, currentModelClass());
         insert(entity);
@@ -68,12 +70,14 @@ public abstract class CrudServiceImpl<M extends BaseMapper<T>, T, D> extends Bas
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void update(D dto) {
         T entity = ConvertUtils.sourceToTarget(dto, currentModelClass());
         updateById(entity);
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void delete(Long[] ids) {
         baseDao.deleteBatchIds(Arrays.asList(ids));
     }
