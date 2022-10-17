@@ -87,10 +87,6 @@ public class ResubmitLockAspect {
 
         StringBuffer lockKeyBuffer = new StringBuffer(RESUBMIT_CHECK_KEY_PREFIX);
 
-//        if (null != GitEggAuthUtils.getTenantId()) {
-//            lockKeyBuffer.append(GitEggAuthUtils.getTenantId()).append(REDIS_SEPARATOR);
-//        }
-
         // 此判断暂时预留，适配后续无用户登录场景，因部分浏览器在跨域请求时，不允许request请求携带cookie，导致每次sessionId都是新的，所以这里默认使用用户id作为key的一部分，不使用sessionId
         if (currentSession) {
             lockKeyBuffer.append(WebUtilsExt.getSessionId()).append(REDIS_SEPARATOR);
