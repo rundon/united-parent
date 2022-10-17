@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpHeaders;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -61,13 +62,21 @@ public class RenExceptionHandler {
         return result;
     }
 
+    @ExceptionHandler(AccessDeniedException.class)
+    public Result handleAccessDeniedException(AccessDeniedException ex) {
+        Result result = new Result();
+        result.error(ErrorCode.FORBIDDEN,ex.getMessage());
+
+        return result;
+    }
+
     @ExceptionHandler(Exception.class)
     public Result handleException(Exception ex) {
         logger.error(ex.getMessage(), ex);
 
         saveLog(ex);
 
-        return new Result().error();
+        return new Result().error(ex.getMessage());
     }
 
     /**
