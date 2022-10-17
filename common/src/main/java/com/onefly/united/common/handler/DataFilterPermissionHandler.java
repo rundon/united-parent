@@ -89,40 +89,4 @@ public class DataFilterPermissionHandler implements DataPermissionHandler {
         }
         return new Column(columnName);
     }
-
-    /**
-     * 获取数据过滤的SQL
-     */
-    private String getSqlFilter(UserDetail user, JoinPoint point) throws Exception {
-        MethodSignature signature = (MethodSignature) point.getSignature();
-        Method method = point.getTarget().getClass().getDeclaredMethod(signature.getName(), signature.getParameterTypes());
-        DataFilter dataFilter = method.getAnnotation(DataFilter.class);
-
-        //获取表的别名
-        String tableAlias = dataFilter.tableAlias();
-        if (StringUtils.isNotBlank(tableAlias)) {
-            tableAlias += ".";
-        }
-
-        StringBuilder sqlFilter = new StringBuilder();
-        sqlFilter.append(" (");
-
-        //部门ID列表
-        List<Long> deptIdList = user.getDeptIdList();
-        if (CollUtil.isNotEmpty(deptIdList)) {
-            sqlFilter.append(tableAlias).append(dataFilter.deptId());
-
-            sqlFilter.append(" in(").append(StringUtils.join(deptIdList, ",")).append(")");
-        }
-
-        //查询本人数据
-        if (CollUtil.isNotEmpty(deptIdList)) {
-            sqlFilter.append(" or ");
-        }
-        sqlFilter.append(tableAlias).append(dataFilter.userId()).append("=").append(user.getId());
-
-        sqlFilter.append(")");
-
-        return sqlFilter.toString();
-    }
 }
