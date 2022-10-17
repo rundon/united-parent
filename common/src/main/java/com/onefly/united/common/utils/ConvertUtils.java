@@ -1,58 +1,92 @@
 /**
  * Copyright (c) 2018 人人开源 All rights reserved.
- *
+ * <p>
  * https://www.renren.io
- *
+ * <p>
  * 版权所有，侵权必究！
  */
 
 package com.onefly.united.common.utils;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.cglib.beans.BeanCopier;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 转换工具类
  *
  * @author Mark sunlightcs@gmail.com
  */
+@Slf4j
 public class ConvertUtils {
-    private static Logger logger = LoggerFactory.getLogger(ConvertUtils.class);
 
-    public static <T> T sourceToTarget(Object source, Class<T> target){
-        if(source == null){
-            return null;
-        }
-        T targetObject = null;
-        try {
-            targetObject = target.newInstance();
-            BeanUtils.copyProperties(source, targetObject);
-        } catch (Exception e) {
-            logger.error("convert error ", e);
-        }
+    /**
+     * 使用缓存提高效率
+     */
+    private static final ConcurrentHashMap<String, BeanCopier> mapCaches = new ConcurrentHashMap<>();
 
-        return targetObject;
+    public static <O, T> T sourceToTarget(O source, Class<T> target) {
+        T instance = baseMapper(source, target);
+        return instance;
     }
 
-    public static <T> List<T> sourceToTarget(Collection<?> sourceList, Class<T> target){
-        if(sourceList == null){
+
+    /**
+     * 根据传进来的对象类型生成新的对象并复制
+     *
+     * @param <O>
+     * @param <T>
+     * @param source
+     * @param target
+     * @return
+     */
+    private static <O, T> T baseMapper(O source, Class<T> target) {
+        String baseKey = generateKey(source.getClass(), target);
+        BeanCopier copier;
+        if (!mapCaches.containsKey(baseKey)) {
+            copier = BeanCopier.create(source.getClass(), target, false);
+            mapCaches.put(baseKey, copier);
+        } else {
+            copier = mapCaches.get(baseKey);
+        }
+        T instance = null;
+        try {
+            instance = target.getDeclaredConstructor().newInstance();
+        } catch (Exception e) {
+            log.error("mapper 创建对象异常" + e.getMessage());
+        }
+        copier.copy(source, instance, null);
+        return instance;
+    }
+
+    /**
+     * 生成key
+     *
+     * @param class1
+     * @param class2
+     * @return
+     */
+    private static String generateKey(Class<?> class1, Class<?> class2) {
+        return class1.toString() + class2.toString();
+    }
+
+
+    public static <T> List<T> sourceToTarget(Collection<?> sourceList, Class<T> target) {
+        if (sourceList == null) {
             return null;
         }
-
         List targetList = new ArrayList<>(sourceList.size());
         try {
-            for(Object source : sourceList){
-                T targetObject = target.newInstance();
-                BeanUtils.copyProperties(source, targetObject);
-                targetList.add(targetObject);
+            for (Object source : sourceList) {
+                T instance = baseMapper(source, target);
+                targetList.add(instance);
             }
-        }catch (Exception e){
-            logger.error("convert error ", e);
+        } catch (Exception e) {
+            log.error("convert error ", e);
         }
 
         return targetList;
