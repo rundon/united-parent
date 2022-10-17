@@ -8,6 +8,7 @@
 
 package com.onefly.united.common.utils;
 
+import com.onefly.united.common.service.IAction;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cglib.beans.BeanCopier;
 
@@ -31,6 +32,22 @@ public class ConvertUtils {
 
     public static <O, T> T sourceToTarget(O source, Class<T> target) {
         T instance = baseMapper(source, target);
+        return instance;
+    }
+
+    /**
+     * 复制到指定类型的对象 lambda
+     *
+     * @param <O>
+     * @param <T>
+     * @param source
+     * @param target
+     * @param action
+     * @return
+     */
+    public static <O, T> T sourceToTarget(O source, Class<T> target, IAction<T> action) {
+        T instance = baseMapper(source, target);
+        action.run(instance);
         return instance;
     }
 
