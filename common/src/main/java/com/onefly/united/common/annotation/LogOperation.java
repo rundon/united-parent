@@ -1,11 +1,3 @@
-/**
- * Copyright (c) 2018 人人开源 All rights reserved.
- *
- * https://www.renren.io
- *
- * 版权所有，侵权必究！
- */
-
 package com.onefly.united.common.annotation;
 
 import java.lang.annotation.*;
@@ -13,7 +5,7 @@ import java.lang.annotation.*;
 /**
  * 操作日志注解
  *
- * @author Mark sunlightcs@gmail.com
+ * @author Mark Rundon
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)

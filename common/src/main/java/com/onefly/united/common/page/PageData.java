@@ -1,11 +1,3 @@
-/**
- * Copyright (c) 2018 人人开源 All rights reserved.
- *
- * https://www.renren.io
- *
- * 版权所有，侵权必究！
- */
-
 package com.onefly.united.common.page;
 
 import io.swagger.annotations.ApiModel;
@@ -18,7 +10,7 @@ import java.util.List;
 /**
  * 分页工具类
  *
- * @author Mark sunlightcs@gmail.com
+ * @author Mark Rundon
  */
 @Data
 @ApiModel(value = "分页数据")

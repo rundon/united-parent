@@ -1,11 +1,3 @@
-/**
- * Copyright (c) 2018 人人开源 All rights reserved.
- *
- * https://www.renren.io
- *
- * 版权所有，侵权必究！
- */
-
 package com.onefly.united.common.convert;
 
 import org.slf4j.Logger;
@@ -23,7 +15,7 @@ import java.util.List;
 /**
  * 日期转换
  *
- * @author Mark sunlightcs@gmail.com
+ * @author Mark Rundon
  */
 @Component
 public class DateConverter implements Converter<String, Date> {

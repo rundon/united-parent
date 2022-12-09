@@ -1,11 +1,3 @@
-/**
- * Copyright (c) 2018 人人开源 All rights reserved.
- *
- * https://www.renren.io
- *
- * 版权所有，侵权必究！
- */
-
 package com.onefly.united.common.validator;
 
 import cn.hutool.core.collection.CollUtil;
@@ -21,7 +13,7 @@ import java.util.Map;
 /**
  * 校验工具类
  *
- * @author Mark sunlightcs@gmail.com
+ * @author Mark Rundon
  * @since 1.0.0
  */
 public class AssertUtils {
@@ -50,7 +42,7 @@ public class AssertUtils {
         }
 
         if (object == null) {
-            throw new RenException(code, params);
+            throw new RenException(code , params);
         }
     }
 

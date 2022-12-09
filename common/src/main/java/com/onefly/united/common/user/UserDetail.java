@@ -1,11 +1,3 @@
-/**
- * Copyright (c) 2018 人人开源 All rights reserved.
- * <p>
- * https://www.renren.io
- * <p>
- * 版权所有，侵权必究！
- */
-
 package com.onefly.united.common.user;
 
 import org.springframework.security.core.GrantedAuthority;
@@ -17,7 +9,7 @@ import java.util.List;
 /**
  * 登录用户信息
  *
- * @author Mark sunlightcs@gmail.com
+ * @author Mark Rundon
  */
 public class UserDetail extends User {
     private static final long serialVersionUID = 1L;

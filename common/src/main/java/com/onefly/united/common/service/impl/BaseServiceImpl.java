@@ -1,11 +1,3 @@
-/**
- * Copyright (c) 2018 人人开源 All rights reserved.
- *
- * https://www.renren.io
- *
- * 版权所有，侵权必究！
- */
-
 package com.onefly.united.common.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
@@ -15,7 +7,6 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.metadata.OrderItem;
 import com.baomidou.mybatisplus.core.toolkit.*;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.baomidou.mybatisplus.extension.toolkit.SqlHelper;
 import com.onefly.united.common.constant.Constant;
 import com.onefly.united.common.page.PageData;
@@ -35,28 +26,29 @@ import java.util.Map;
 /**
  * 基础服务类，所有Service都要继承
  *
- * @author Mark sunlightcs@gmail.com
+ * @author Mark Rundon
  */
-public abstract class BaseServiceImpl<M extends BaseMapper<T>, T>  implements BaseService<T> {
+public abstract class BaseServiceImpl<M extends BaseMapper<T>, T> implements BaseService<T> {
     @Autowired
     protected M baseDao;
 
     /**
      * 获取分页对象
-     * @param params      分页查询参数
-     * @param defaultOrderField  默认排序字段
-     * @param isAsc              排序方式
+     *
+     * @param params            分页查询参数
+     * @param defaultOrderField 默认排序字段
+     * @param isAsc             排序方式
      */
     protected IPage<T> getPage(Map<String, Object> params, String defaultOrderField, boolean isAsc) {
         //分页参数
         long curPage = 1;
         long limit = 10;
 
-        if(params.get(Constant.PAGE) != null){
-            curPage = Long.parseLong((String)params.get(Constant.PAGE));
+        if (params.get(Constant.PAGE) != null) {
+            curPage = Long.parseLong((String) params.get(Constant.PAGE));
         }
-        if(params.get(Constant.LIMIT) != null){
-            limit = Long.parseLong((String)params.get(Constant.LIMIT));
+        if (params.get(Constant.LIMIT) != null) {
+            limit = Long.parseLong((String) params.get(Constant.LIMIT));
         }
 
         //分页对象
@@ -66,49 +58,49 @@ public abstract class BaseServiceImpl<M extends BaseMapper<T>, T>  implements Ba
         params.put(Constant.PAGE, page);
 
         //排序字段
-        String orderField = (String)params.get(Constant.ORDER_FIELD);
-        String order = (String)params.get(Constant.ORDER);
+        String orderField = (String) params.get(Constant.ORDER_FIELD);
+        String order = (String) params.get(Constant.ORDER);
 
         //前端字段排序
-        if(StringUtils.isNotBlank(orderField) && StringUtils.isNotBlank(order)){
-            if(Constant.ASC.equalsIgnoreCase(order)) {
+        if (StringUtils.isNotBlank(orderField) && StringUtils.isNotBlank(order)) {
+            if (Constant.ASC.equalsIgnoreCase(order)) {
                 return page.addOrder(OrderItem.asc(orderField));
-            }else {
+            } else {
                 return page.addOrder(OrderItem.desc(orderField));
             }
         }
 
         //没有排序字段，则不排序
-        if(StringUtils.isBlank(defaultOrderField)){
+        if (StringUtils.isBlank(defaultOrderField)) {
             return page;
         }
 
         //默认排序
-        if(isAsc) {
+        if (isAsc) {
             page.addOrder(OrderItem.asc(defaultOrderField));
-        }else {
+        } else {
             page.addOrder(OrderItem.desc(defaultOrderField));
         }
 
         return page;
     }
 
-    protected <T> PageData<T> getPageData(List<?> list, long total, Class<T> target){
+    protected <T> PageData<T> getPageData(List<?> list, long total, Class<T> target) {
         List<T> targetList = ConvertUtils.sourceToTarget(list, target);
 
         return new PageData<>(targetList, total);
     }
 
-    protected <T> PageData<T> getPageData(IPage page, Class<T> target){
+    protected <T> PageData<T> getPageData(IPage page, Class<T> target) {
         return getPageData(page.getRecords(), page.getTotal(), target);
     }
 
-    protected Map<String, Object> paramsToLike(Map<String, Object> params, String... likes){
-        for (String like : likes){
-            String val = (String)params.get(like);
-            if (StringUtils.isNotBlank(val)){
+    protected Map<String, Object> paramsToLike(Map<String, Object> params, String... likes) {
+        for (String like : likes) {
+            String val = (String) params.get(like);
+            if (StringUtils.isNotBlank(val)) {
                 params.put(like, "%" + val + "%");
-            }else {
+            } else {
                 params.put(like, null);
             }
         }
@@ -131,7 +123,7 @@ public abstract class BaseServiceImpl<M extends BaseMapper<T>, T>  implements Ba
     }
 
     protected Class<T> currentModelClass() {
-        return (Class<T>)ReflectionKit.getSuperClassGenericType(this.getClass(), BaseServiceImpl.class, 1);
+        return (Class<T>) ReflectionKit.getSuperClassGenericType(this.getClass(), BaseServiceImpl.class, 1);
     }
 
     /**
@@ -145,9 +137,10 @@ public abstract class BaseServiceImpl<M extends BaseMapper<T>, T>  implements Ba
 
     /**
      * 释放sqlSession
+     *
      * @param sqlSession session
      */
-    protected void closeSqlSession(SqlSession sqlSession){
+    protected void closeSqlSession(SqlSession sqlSession) {
         SqlSessionUtils.closeSqlSession(sqlSession, GlobalConfigUtils.currentSessionFactory(currentModelClass()));
     }
 
@@ -195,7 +188,7 @@ public abstract class BaseServiceImpl<M extends BaseMapper<T>, T>  implements Ba
                 i++;
             }
             batchSqlSession.flushStatements();
-        }finally {
+        } finally {
             closeSqlSession(batchSqlSession);
         }
         return true;
@@ -239,7 +232,7 @@ public abstract class BaseServiceImpl<M extends BaseMapper<T>, T>  implements Ba
                 i++;
             }
             batchSqlSession.flushStatements();
-        }finally {
+        } finally {
             closeSqlSession(batchSqlSession);
         }
         return true;

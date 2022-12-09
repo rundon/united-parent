@@ -1,11 +1,3 @@
-/**
- * Copyright (c) 2018 人人开源 All rights reserved.
- *
- * https://www.renren.io
- *
- * 版权所有，侵权必究！
- */
-
 package com.onefly.united.common.entity;
 
 import com.baomidou.mybatisplus.annotation.FieldFill;
@@ -19,7 +11,7 @@ import java.util.Date;
 /**
  * 基础实体类，所有实体都需要继承
  *
- * @author Mark sunlightcs@gmail.com
+ * @author Mark Rundon
  */
 @Data
 public abstract class BaseEntity implements Serializable {

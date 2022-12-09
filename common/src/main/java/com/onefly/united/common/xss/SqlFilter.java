@@ -1,11 +1,3 @@
-/**
- * Copyright (c) 2018 人人开源 All rights reserved.
- *
- * https://www.renren.io
- *
- * 版权所有，侵权必究！
- */
-
 package com.onefly.united.common.xss;
 
 import com.onefly.united.common.exception.ErrorCode;
@@ -14,7 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 
 /**
  * SQL过滤
- * @author Mark sunlightcs@gmail.com
+ * @author Mark Rundon
  */
 public class SqlFilter {
 

@@ -7,6 +7,7 @@
     <modules>
         <module>common</module>
         <module>sigar</module>
+        <module>tenant</module>
     </modules>
     <packaging>pom</packaging>
 

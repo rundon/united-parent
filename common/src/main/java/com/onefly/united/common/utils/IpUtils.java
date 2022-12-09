@@ -1,11 +1,3 @@
-/**
- * Copyright (c) 2018 人人开源 All rights reserved.
- *
- * https://www.renren.io
- *
- * 版权所有，侵权必究！
- */
-
 package com.onefly.united.common.utils;
 
 import org.apache.commons.lang3.StringUtils;
@@ -17,7 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 /**
  * IP地址
  * 
- * @author Mark sunlightcs@gmail.com
+ * @author Mark Rundon
  */
 public class IpUtils {
 	private static Logger logger = LoggerFactory.getLogger(IpUtils.class);

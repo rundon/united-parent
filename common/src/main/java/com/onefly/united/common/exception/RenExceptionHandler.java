@@ -1,47 +1,35 @@
-/**
- * Copyright (c) 2018 人人开源 All rights reserved.
- * <p>
- * https://www.renren.io
- * <p>
- * 版权所有，侵权必究！
- */
-
 package com.onefly.united.common.exception;
 
 import cn.hutool.core.map.MapUtil;
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Maps;
-import com.onefly.united.common.constant.Constant;
 import com.onefly.united.common.constant.LogMessageDto;
+import com.onefly.united.common.redis.RedisMqUtil;
 import com.onefly.united.common.utils.HttpContextUtils;
 import com.onefly.united.common.utils.IpUtils;
 import com.onefly.united.common.utils.Result;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Date;
 import java.util.Map;
 
 
 /**
  * 异常处理器
  *
- * @author Mark sunlightcs@gmail.com
+ * @author Mark Rundon
  * @since 1.0.0
  */
 @RestControllerAdvice
 public class RenExceptionHandler {
     private static final Logger logger = LoggerFactory.getLogger(RenExceptionHandler.class);
-
-    @Autowired
-    private StringRedisTemplate redisTemplate;
 
     /**
      * 处理自定义异常
@@ -65,7 +53,7 @@ public class RenExceptionHandler {
     @ExceptionHandler(AccessDeniedException.class)
     public Result handleAccessDeniedException(AccessDeniedException ex) {
         Result result = new Result();
-        result.error(ErrorCode.FORBIDDEN,ex.getMessage());
+        result.error(ErrorCode.FORBIDDEN, ex.getMessage());
 
         return result;
     }
@@ -96,9 +84,10 @@ public class RenExceptionHandler {
         if (MapUtil.isNotEmpty(params)) {
             data.put("requestParams", JSON.toJSONString(params));
         }
+        data.put("createDate", new Date());
         //异常信息
         data.put("errorInfo", ExceptionUtils.getErrorStackTrace(ex));
         log.setData(data);
-        redisTemplate.convertAndSend(Constant.LOG_CHANNEL_TOPIC, JSON.toJSONString(log));
+        RedisMqUtil.addQueueTask(JSON.toJSONString(log));
     }
 }
